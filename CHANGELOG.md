@@ -28,6 +28,8 @@ The first release, to be tagged 0.1.0.
   generated DLS bank (`tests/data/sine.dls`) of two probe files and `features.mid`, which covers
   the MIDI and SysEx handling and more notes than voices. With `GSWAVETABLE_DLS` the same goldens on
   `gm.dls`.
+- CI on Linux (GCC, Clang), macOS (AppleClang), Windows (MSVC) and WebAssembly (Emscripten on
+  Node.js), warnings as errors, so that the golden hashes are checked on every platform.
 
 ### Notes
 
