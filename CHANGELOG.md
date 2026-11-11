@@ -23,6 +23,11 @@ The first release, to be tagged 0.1.0.
   -144.8 dB, float precision).
 - `gswavetable-render`: renders a MIDI file to WAV, from a tick (`--from`), at 22 050 Hz or through
   the converter at 48 kHz (`--48k`). The WAV ends at the file's end frame.
+- Tests that need no Windows files: the tables' hash (FNV-1a 64 `0xa71c7a8d3fdda710`), the
+  sequencer on generated MIDI files, the converter's tone response, and golden SHA-256 renders on a
+  generated DLS bank (`tests/data/sine.dls`) of two probe files and `features.mid`, which covers
+  the MIDI and SysEx handling and more notes than voices. With `GSWAVETABLE_DLS` the same goldens on
+  `gm.dls`.
 
 ### Notes
 

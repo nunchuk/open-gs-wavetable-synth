@@ -1,0 +1,13 @@
+# Golden renders: name, bank, MIDI file, start tick, SHA-256 of the WAV gswavetable-render writes.
+# sine.dls is tests/data/sine.dls; gm.dls is Windows' ($GSWAVETABLE_DLS, SHA-256 3229b09b...).
+# Every change must leave these hashes as they are (AGENTS.md).
+probe1.sine	sine.dls	probe1.mid	0	edd90fec975c7c8260df59edb167b1a3cc1802912bc60de604f0a7d9dd1733a1
+probe2.sine	sine.dls	probe2.mid	0	4d314e3165035359691e5d41e6f35837fc97e1058ba9da40c9f10b074551e77f
+probe2-from-5000.sine	sine.dls	probe2.mid	5000	58d4f88303041d10664a4b6a06ef4ebf462d4e75d941f8fbcb7462641bd8e8db
+features.sine	sine.dls	features.mid	0	7ed8ac74c10a269261f1cc9230c092f85b1368a201d756e703d342580871bf6f
+features-from-4608.sine	sine.dls	features.mid	4608	f8bf0fd2a14730c77df0f34732eaeb5bd009c0632632b21ff29776b3789fd7e3
+probe1.gm	gm.dls	probe1.mid	0	7cb1aaa1f211c0a4f7d61d519f7bba8880e2fdc16d41719061f532b5ee476816
+probe2.gm	gm.dls	probe2.mid	0	f951662606bfd402d0d10e43b6cf2d035180e6c0148a946e582921f4ce6a9dcb
+probe2-from-5000.gm	gm.dls	probe2.mid	5000	2ca23a010fa1389e3e1ffa98efa00839540c9f2d058c6c75637d871d5d7359d2
+features.gm	gm.dls	features.mid	0	bfda77303e2c0058043eb74c8cadb585dcecd511aa7649586a339a72866ee5b1
+features-from-4608.gm	gm.dls	features.mid	4608	32ea6031f265f6b6197b5e7bccb2df8d83dc9883ab6b77c13b56875a18d7a21e
