@@ -30,6 +30,8 @@ The first release, to be tagged 0.1.0.
   `gm.dls`.
 - CI on Linux (GCC, Clang), macOS (AppleClang), Windows (MSVC) and WebAssembly (Emscripten on
   Node.js), warnings as errors, so that the golden hashes are checked on every platform.
+- AI collaboration rules: `AGENTS.md` (shared, with this project's build commands, code map and
+  invariants), `CLAUDE.md` and a Kiro agent that load it.
 
 ### Notes
 

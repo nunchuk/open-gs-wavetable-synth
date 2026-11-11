@@ -8,7 +8,43 @@ the tool's own entry file.
 
 ## Project
 
-<!-- TODO: one or two paragraphs on what this project is, its stack, and how to run it. -->
+A bit-exact C++20 reimplementation of the Microsoft GS Wavetable Synth (the DirectMusic synth
+core of Windows' `SysWOW64\wdmaud.drv` 10.0.20348.2849), with an MCI-style MIDI file player and
+Windows' 22 050 -> 48 000 Hz converter. README.md states what it does and how it was verified.
+
+### Build and test
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure
+GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the gm.dls goldens
+```
+
+### Code map
+
+| Path | What |
+|---|---|
+| `include/gswavetable/engine.hpp`, `src/engine.cpp` | The synth: DLS loader (`load_dls`), `Synth`, the tables. Comments give the field offsets and function RVAs of the Windows binary. |
+| `include/gswavetable/sequencer.hpp`, `src/sequencer.cpp` | `Sequencer`: a Standard MIDI File as `mciseq.dll` orders it, scheduled on the exact tempo map. |
+| `include/gswavetable/player.hpp`, `src/player.cpp` | `Player`: play / stop / pause / resume, rendering in Windows' 10 ms cycles. |
+| `include/gswavetable/resampler.hpp` | `Resampler`: Windows' 22 050 -> 48 000 Hz converter (header only). |
+| `tools/render.cpp` | `gswavetable-render`, the CLI. |
+| `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`. |
+| `tests/data/` | `golden.tsv`, the probe and feature MIDI files, `sine.dls`, and the scripts that generated `sine.dls` and `features.mid`. |
+
+### Invariants
+
+- **No change may alter a golden hash** (`tests/data/golden.tsv`, `tables_test`'s hash). They pin
+  the output of the engine as it was verified against Windows; a different hash means a different
+  sound.
+- **A change to the synth's arithmetic needs sample-by-sample evidence** that it matches Windows
+  (a recording of the Windows synth, replayed), stated in the change log entry. Plausible-looking
+  "fixes" without it are regressions.
+- **Never commit `gm.dls`**, other Windows files, or MIDI files that are not ours to distribute.
+- Portable C++20 only: no compiler extensions, no dependencies, warning-free with
+  `-Wall -Wextra -Wpedantic -Wconversion` (and MSVC `/W4`), no floating-point contraction.
+- Every `Synth` or `Player` is used by one thread at a time; a loaded `Bank` is immutable.
 
 ## Working principles (from Andrej Karpathy's notes on common LLM coding mistakes)
 
@@ -21,9 +57,11 @@ Source: https://github.com/multica-ai/andrej-karpathy-skills
 
 ## Python conventions
 
+Python is used only for the test-data generators in `tests/data/` (standard library only).
+
 - Use `python3` / `pip3` — never bare `pip` / `python`.
-- Always work inside the virtualenv; activate it before installing. Pin versions in `requirements.txt`.
-- `.venv/` and `.env` are gitignored. Never commit secrets; configuration comes from environment variables (`.env`).
+- Should a package ever be needed, work inside a virtualenv and pin versions in `requirements.txt`.
+- `.venv/` and `.env` are gitignored. Never commit secrets.
 - Type hints, PEP 8, docstrings on functions and classes. Use `black` / `flake8` when available.
 
 ## Language
