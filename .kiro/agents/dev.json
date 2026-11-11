@@ -1,0 +1,7 @@
+{
+  "name": "dev",
+  "description": "Default project agent; rules come from AGENTS.md",
+  "tools": ["fs_read", "fs_write", "execute_bash"],
+  "allowedTools": ["fs_read"],
+  "resources": ["file://AGENTS.md"]
+}
