@@ -8,3 +8,7 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Build trees
+build/
+build-*/
