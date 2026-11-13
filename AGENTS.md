@@ -34,7 +34,7 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
 | `examples/` | `render_wav.cpp` (README.md's C++ block, verbatim) and `audio_callback.cpp`; also a standalone CMake project that finds the installed package. |
 | `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`, and the CMake scripts that check README.md against `examples/` and the examples' output. |
 | `tests/data/` | `golden.tsv`, the probe and feature MIDI files, `sine.dls`, and the scripts that generated `sine.dls` and `features.mid`. |
-| `docs/charts/`, `docs/images/` | README.md's charts (SVG, light and dark) and the scripts and data that make them; the MSGS about box. |
+| `docs/charts/`, `docs/images/` | README.md's images and the scripts and data that make them: the charts (SVG, light and dark), the header image `open-gs-about.png` (also the repository's social preview; upload it again after a change), and the MSGS about box. |
 | `.github/workflows/` | `ci.yml` (every platform, warnings as errors, install and consume), `release.yml` (binaries on a `v*` tag). |
 
 ### Invariants
@@ -64,7 +64,9 @@ Source: https://github.com/multica-ai/andrej-karpathy-skills
 
 ## Python conventions
 
-Python is used only for the test-data generators in `tests/data/` (standard library only).
+Python is used only for the test-data generators in `tests/data/` and the README's images in
+`docs/charts/`: the standard library, except `make_social_preview.py`, which needs Pillow
+(`docs/requirements.txt`).
 
 - Use `python3` / `pip3` — never bare `pip` / `python`.
 - Should a package ever be needed, work inside a virtualenv and pin versions in `requirements.txt`.

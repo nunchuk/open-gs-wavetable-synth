@@ -13,10 +13,7 @@ Windows synth's own engine, reproduced sample for sample.
 
 [Quick start](#quick-start) · [Sample for sample](#sample-for-sample-the-windows-synth) · [22 050 Hz or 48 kHz](#22-050-hz-or-48-khz) · [FAQ](#faq)
 
-<img src="docs/images/msgs-about.png" width="356" alt="The about box of Windows' Microsoft GS Software Wavetable Synthesizer: Microsoft Software Wavetable Synthesizer, featuring Roland Sound Canvas digital; Sound Canvas Sample Set: GM/GS(R) Sound Set Copyright 1996 Roland Corporation U.S.">
-<br>
-<sub>The synth this library reimplements, as Windows shows it: Microsoft's software synthesizer
-playing Roland's 1996 GM/GS sound set (<code>gm.dls</code>).</sub>
+<img src="docs/images/open-gs-about.png" width="640" alt="An About dialog in the Windows 98 style: Open GS, the Microsoft GS Wavetable Synth of Windows, reimplemented in C++20, bit-exact, MIT licensed. Verified against the Windows synth: 52 recordings replayed, 64 036 275 frames compared, 0 differing samples. Renders MIDI with gm.dls on macOS, iOS, Linux, Windows and WebAssembly.">
 
 </div>
 
@@ -26,6 +23,13 @@ Windows. Render MIDI files with Windows' `gm.dls` on **macOS, iOS,
 Linux, Windows and the Web (WebAssembly)** and get the Windows synth's sound: given the same MIDI
 events at the same sample times and the same render calls, the output equals the Windows synth's,
 sample for sample. No dependencies beyond the C++ standard library; MIT licensed.
+
+<p align="center">
+  <img src="docs/images/msgs-about.png" width="356" alt="The about box of Windows' Microsoft GS Software Wavetable Synthesizer: Microsoft Software Wavetable Synthesizer, featuring Roland Sound Canvas digital; Sound Canvas Sample Set: GM/GS(R) Sound Set Copyright 1996 Roland Corporation U.S.">
+  <br>
+  <sub>The synth this library reimplements, as Windows shows it: Microsoft's software synthesizer
+  playing Roland's 1996 GM/GS sound set (<code>gm.dls</code>).</sub>
+</p>
 
 ## At a glance
 

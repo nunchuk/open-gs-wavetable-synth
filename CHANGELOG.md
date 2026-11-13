@@ -5,6 +5,18 @@ All notable changes to this project are documented here, following the
 
 ## [Unreleased]
 
+### Changed
+
+- README.md's header shows an "About Open GS" dialog in the Windows 98 style with the evidence
+  (52 recordings, 64 036 275 frames, 0 differing samples), the same image as the repository's
+  social preview; the Windows about box of the synth moved below the introduction. Why: the header
+  should show this project, and a 1280 x 640 image does both jobs.
+
+### Added
+
+- `docs/charts/make_social_preview.py` draws that image (Pillow, pinned in `docs/requirements.txt`),
+  so that it can be made again when its numbers change.
+
 ## [0.1.0] - 2026-11-13
 
 The first release of Open GS: the Microsoft GS Wavetable Synth (MSGS) of Windows, reimplemented in
