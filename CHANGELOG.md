@@ -7,7 +7,13 @@ All notable changes to this project are documented here, following the
 
 ## [0.1.0] - 2026-11-13
 
-The first release.
+The first release of Open GS: the Microsoft GS Wavetable Synth (MSGS) of Windows, reimplemented in
+C++20 and bit-exact. 52 recordings of the Windows synth (64.0 M frames) replay with 0 differing
+samples, and Linux, macOS, Windows and WebAssembly render the same samples.
+
+- `gswavetable-render gm.dls song.mid song.wav` renders a MIDI file at 22 050 Hz, or at 48 kHz with
+  `--48k` (transparent) or `--48k windows` (as Windows 10 converts it).
+- A C++20 library with a CMake package (`FetchContent`, `find_package`) and examples.
 
 ### Added
 
@@ -65,8 +71,12 @@ The first release.
   manager port needs.
 - `.github/workflows/release.yml`: on a `v*` tag, builds and tests on Linux (libstdc++ linked
   statically), macOS (universal arm64 and x86_64), Windows (static CRT) and WebAssembly, and
-  attaches the installed trees to the tag's GitHub Release with the version's CHANGELOG section as
-  its notes, so that the CLI can be used without building it.
+  attaches the installed trees to the tag's GitHub Release, so that the CLI can be used without
+  building it. The files are `opengs-macos.tar.gz`, `opengs-linux.tar.gz`, `opengs-windows.zip`
+  and `opengs-wasm.tar.gz`, without a version, so that `releases/latest/download/<file>` always
+  names the latest; the notes are the summary at the top of the version's section here, the
+  downloads and a link to this file (the first v0.1.0 attached `gswavetable-0.1.0-<platform>` with
+  the whole section as notes, too long to read and not named like the repository).
 - README.md written for readers that search and compare, people and AI agents alike: an
   at-a-glance table, a quick start, the evidence as charts with their numbers in text and tables
   (a recording of the Windows synth against this library's replay; the two 48 kHz converters'

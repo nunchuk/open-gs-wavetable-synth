@@ -2,7 +2,9 @@ name: Release
 
 # On a version tag (v0.1.0): build on every platform, run the tests, and attach the installed tree
 # (gswavetable-render, the library, its headers and CMake package, LICENSE, README.md) to the tag's
-# GitHub Release, whose notes are the version's section of CHANGELOG.md.
+# GitHub Release as opengs-<platform>. The files carry no version, so that
+# releases/latest/download/opengs-<platform> always names the latest. The notes are the summary at
+# the top of the version's CHANGELOG.md section, the downloads, and a link to the full changelog.
 on:
   push:
     tags: ["v*"]
@@ -17,13 +19,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: linux-x86_64
+          - name: linux
             os: ubuntu-22.04
             options: '"-DCMAKE_EXE_LINKER_FLAGS=-static-libstdc++ -static-libgcc"'
-          - name: macos-universal
+          - name: macos
             os: macos-latest
             options: '"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"'
-          - name: windows-x86_64
+          - name: windows
             os: windows-latest
             options: "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
     defaults:
@@ -38,15 +40,15 @@ jobs:
           ctest --test-dir build --build-config Release --output-on-failure
       - name: Package
         run: |
-          dir="gswavetable-${GITHUB_REF_NAME#v}-${{ matrix.name }}"
+          dir="opengs-${{ matrix.name }}"
           cmake --install build --config Release --prefix "$dir"
           if [ "$RUNNER_OS" = Windows ]; then 7z a "$dir.zip" "$dir"; else tar czf "$dir.tar.gz" "$dir"; fi
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: |
-            gswavetable-*.tar.gz
-            gswavetable-*.zip
+            opengs-*.tar.gz
+            opengs-*.zip
 
   wasm:
     name: wasm (Node.js)
@@ -63,13 +65,13 @@ jobs:
           ctest --test-dir build --output-on-failure
       - name: Package
         run: |
-          dir="gswavetable-${GITHUB_REF_NAME#v}-wasm"
+          dir="opengs-wasm"
           cmake --install build --prefix "$dir"
           tar czf "$dir.tar.gz" "$dir"
       - uses: actions/upload-artifact@v4
         with:
           name: wasm
-          path: gswavetable-*.tar.gz
+          path: opengs-*.tar.gz
 
   release:
     needs: [native, wasm]
@@ -85,6 +87,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${GITHUB_REF_NAME#v}"
-          awk -v v="$version" '/^## \[/ { if (on) exit; on = index($0, "[" v "]") > 0; next } on' CHANGELOG.md > notes.md
-          [ -s notes.md ] || echo "See CHANGELOG.md." > notes.md
-          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes-file notes.md
+          url="https://github.com/$GITHUB_REPOSITORY"
+          # The version's summary: its CHANGELOG.md section up to the first ### heading.
+          awk -v v="$version" '/^## \[/ { if (on) exit; on = index($0, "[" v "]") > 0; next } on && /^### / { exit } on' \
+            CHANGELOG.md | sed '/./,$!d' > notes.md
+          cat >> notes.md <<EOF
+
+          | Download | For |
+          |---|---|
+          | \`opengs-macos.tar.gz\` | macOS, Apple silicon and Intel |
+          | \`opengs-linux.tar.gz\` | Linux x86-64 |
+          | \`opengs-windows.zip\` | Windows x64 |
+          | \`opengs-wasm.tar.gz\` | Node.js: \`node bin/gswavetable-render.js\` |
+
+          Each holds \`gswavetable-render\`, the library, its headers and CMake package. \`gm.dls\` is not
+          included: copy it from \`C:\\Windows\\System32\\drivers\\gm.dls\`. [Full changelog]($url/blob/$GITHUB_REF_NAME/CHANGELOG.md)
+          EOF
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "Open GS $version" --notes-file notes.md
