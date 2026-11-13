@@ -77,7 +77,8 @@ samples, and Linux, macOS, Windows and WebAssembly render the same samples.
   names the latest; the notes are the summary at the top of the version's section here, the
   downloads and a link to this file (the first v0.1.0 attached `gswavetable-0.1.0-<platform>` with
   the whole section as notes, too long to read and not named like the repository).
-- README.md written for readers that search and compare, people and AI agents alike: an
+- README.md written for readers that search and compare, people and AI agents alike, under the
+  project's short name, Open GS (the files of a release are `opengs-<platform>`): an
   at-a-glance table, a quick start, the evidence as charts with their numbers in text and tables
   (a recording of the Windows synth against this library's replay; the two 48 kHz converters'
   response, from `docs/charts/converter_response.cpp`), when not to use it, an FAQ, and the

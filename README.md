@@ -1,6 +1,6 @@
 <div align="center">
 
-# open-gs-wavetable-synth
+# Open GS
 
 **The Microsoft GS Wavetable Synth, bit-exact, on every platform.**<br>
 Render MIDI with Windows' `gm.dls` on macOS, iOS, Linux, Windows and WebAssembly through the
@@ -20,8 +20,9 @@ playing Roland's 1996 GM/GS sound set (<code>gm.dls</code>).</sub>
 
 </div>
 
-A bit-exact, portable C++20 reimplementation of the **Microsoft GS Wavetable Synth** (MSGS), the
-MIDI synthesizer built into Windows. Render MIDI files with Windows' `gm.dls` on **macOS, iOS,
+Open GS (this repository, `open-gs-wavetable-synth`) is a bit-exact, portable C++20
+reimplementation of the **Microsoft GS Wavetable Synth** (MSGS), the MIDI synthesizer built into
+Windows. Render MIDI files with Windows' `gm.dls` on **macOS, iOS,
 Linux, Windows and the Web (WebAssembly)** and get the Windows synth's sound: given the same MIDI
 events at the same sample times and the same render calls, the output equals the Windows synth's,
 sample for sample. No dependencies beyond the C++ standard library; MIT licensed.
@@ -53,9 +54,14 @@ build/gswavetable-render --48k windows gm.dls song.mid w.wav   # 48 000 Hz as Wi
 build/gswavetable-render --from 1920 gm.dls song.mid tail.wav  # from tick 1920, with the chase
 ```
 
-The WAV ends where the file ends (its last tick), where Windows closes the MIDI port. Releases
-(from v0.1.0) attach `gswavetable-render` built for Linux, macOS (universal), Windows and Node.js
-(`node gswavetable-render.js ...`), with the library and its CMake package.
+The WAV ends where the file ends (its last tick), where Windows closes the MIDI port.
+
+Or download it: each [release](https://github.com/nunchuk/open-gs-wavetable-synth/releases) has
+`opengs-macos.tar.gz` (Apple silicon and Intel), `opengs-linux.tar.gz` (x86-64),
+`opengs-windows.zip` (x64) and `opengs-wasm.tar.gz` (Node.js: `node bin/gswavetable-render.js`),
+each with `gswavetable-render`, the library and its CMake package. The latest is always at
+`https://github.com/nunchuk/open-gs-wavetable-synth/releases/latest/download/opengs-macos.tar.gz`
+(and so on for the others).
 
 ### Use it from CMake
 

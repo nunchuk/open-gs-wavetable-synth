@@ -8,8 +8,9 @@ the tool's own entry file.
 
 ## Project
 
-A bit-exact C++20 reimplementation of the Microsoft GS Wavetable Synth (the DirectMusic synth
-core of Windows' `SysWOW64\wdmaud.drv` 10.0.20348.2849), with an MCI-style MIDI file player and
+Open GS (`open-gs-wavetable-synth`; release files `opengs-<platform>`; the library, CLI and CMake
+package `gswavetable`): a bit-exact C++20 reimplementation of the Microsoft GS Wavetable Synth (the
+DirectMusic synth core of Windows' `SysWOW64\wdmaud.drv` 10.0.20348.2849), with an MCI-style MIDI file player and
 Windows' 22 050 -> 48 000 Hz converter. README.md states what it does and how it was verified.
 
 ### Build and test
