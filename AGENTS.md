@@ -30,7 +30,8 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
 | `include/gswavetable/player.hpp`, `src/player.cpp` | `Player`: play / stop / pause / resume, rendering in Windows' 10 ms cycles. |
 | `include/gswavetable/resampler.hpp` | The 22 050 -> 48 000 Hz converters (header only): `TransparentResampler` (the default) and `WindowsResampler` (Windows 10's audio engine's). |
 | `tools/render.cpp` | `gswavetable-render`, the CLI. |
-| `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`. |
+| `examples/` | `render_wav.cpp` (README.md's C++ block, verbatim) and `audio_callback.cpp`; also a standalone CMake project that finds the installed package. |
+| `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`, and the CMake scripts that check README.md against `examples/` and the examples' output. |
 | `tests/data/` | `golden.tsv`, the probe and feature MIDI files, `sine.dls`, and the scripts that generated `sine.dls` and `features.mid`. |
 
 ### Invariants
@@ -45,6 +46,8 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
 - Portable C++20 only: no compiler extensions, no dependencies, warning-free with
   `-Wall -Wextra -Wpedantic -Wconversion` (and MSVC `/W4`), no floating-point contraction.
 - Every `Synth` or `Player` is used by one thread at a time; a loaded `Bank` is immutable.
+- README.md's C++ block is `examples/render_wav.cpp`, character for character (ctest
+  `readme_example`); change both together.
 
 ## Working principles (from Andrej Karpathy's notes on common LLM coding mistakes)
 

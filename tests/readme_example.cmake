@@ -1,0 +1,20 @@
+# The C++ block in README.md is examples/render_wav.cpp, character for character, so that the code
+# a reader copies from the README is the code CI builds and runs.
+#   cmake -DREADME=README.md -DEXAMPLE=examples/render_wav.cpp -P readme_example.cmake
+file(READ "${README}" readme)
+file(READ "${EXAMPLE}" example)
+string(REPLACE "\r\n" "\n" readme "${readme}")
+string(REPLACE "\r\n" "\n" example "${example}")
+string(FIND "${readme}" "```cpp\n" start)
+if(start EQUAL -1)
+  message(FATAL_ERROR "README.md has no ```cpp block")
+endif()
+math(EXPR start "${start} + 7")
+string(SUBSTRING "${readme}" ${start} -1 rest)
+string(FIND "${rest}" "\n```" end)
+math(EXPR end "${end} + 1")
+string(SUBSTRING "${rest}" 0 ${end} block)
+if(NOT block STREQUAL example)
+  message(FATAL_ERROR "README.md's C++ example is not ${EXAMPLE}: copy the file into the README")
+endif()
+message(STATUS "README.md's C++ example is ${EXAMPLE}")

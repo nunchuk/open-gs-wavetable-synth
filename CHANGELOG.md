@@ -42,7 +42,18 @@ The first release, to be tagged 0.1.0.
   the MIDI and SysEx handling and more notes than voices. With `GSWAVETABLE_DLS` the same goldens on
   `gm.dls`.
 - CI on Linux (GCC, Clang), macOS (AppleClang), Windows (MSVC) and WebAssembly (Emscripten on
-  Node.js), warnings as errors, so that the golden hashes are checked on every platform.
+  Node.js), warnings as errors, so that the golden hashes are checked on every platform; each
+  native job also installs the library and builds `examples/` against the installed package.
+- `examples/render_wav.cpp` and `examples/audio_callback.cpp` (48 kHz float frames on demand, as an
+  audio callback asks for them), built in CI. Why: agents and people copy the README's code, so it
+  must compile and give the verified sound. ctest `readme_example` checks that README.md's C++
+  block is `examples/render_wav.cpp` character for character, `example_render_wav` that it writes
+  the golden render of `probe1.mid`, and `example_audio_callback` that the streamed 48 kHz frames
+  equal `gswavetable-render --48k`'s, then silence. `.gitattributes` keeps text files LF so those
+  byte comparisons hold on Windows checkouts.
+- CMake install rules and a package config: `find_package(gswavetable 0.1 REQUIRED)` after
+  `cmake --install` (`GSWAVETABLE_INSTALL`, on when this is the top-level project), which a package
+  manager port needs.
 - AI collaboration rules: `AGENTS.md` (shared, with this project's build commands, code map and
   invariants), `CLAUDE.md` and a Kiro agent that load it.
 

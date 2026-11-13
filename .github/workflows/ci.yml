@@ -18,6 +18,9 @@ jobs:
           - { name: Windows MSVC, os: windows-latest, cxx: cl }
     env:
       CXX: ${{ matrix.cxx }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - name: Configure
@@ -26,6 +29,11 @@ jobs:
         run: cmake --build build --config Release --parallel
       - name: Test
         run: ctest --test-dir build --build-config Release --output-on-failure
+      - name: Install, and build the examples against the installed package
+        run: |
+          cmake --install build --config Release --prefix "$PWD/install"
+          cmake -S examples -B build-examples -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$PWD/install"
+          cmake --build build-examples --config Release --parallel
 
   emscripten:
     name: WebAssembly (Emscripten, Node.js)

@@ -28,13 +28,19 @@ target_link_libraries(your_app PRIVATE gswavetable::gswavetable)
 
 As a subproject it builds only the library (`add_subdirectory` works the same way); the CLI and
 the tests are built when this is the top-level project (`GSWAVETABLE_BUILD_TOOLS`,
-`GSWAVETABLE_BUILD_TESTS`).
+`GSWAVETABLE_BUILD_TESTS`). Installed (`cmake --install build`), it is found with
+`find_package(gswavetable 0.1 REQUIRED)`.
 
 ## Render a MIDI file
 
+[`examples/render_wav.cpp`](examples/render_wav.cpp), which CI builds and checks against a golden render:
+
 ```cpp
+// Renders a MIDI file to a 22 050 Hz WAV the way Windows' Microsoft GS Wavetable Synth plays it.
+//   render_wav gm.dls song.mid song.wav
 #include <gswavetable/player.hpp>
 
+#include <cstdint>
 #include <fstream>
 #include <iterator>
 #include <vector>
@@ -44,20 +50,31 @@ static std::vector<std::uint8_t> read(const char *path) {
     return {std::istreambuf_iterator<char>(in), {}};
 }
 
-int main() {
-    // Throws std::runtime_error if the synth would reject the bank, std::invalid_argument for a bad MIDI file.
-    gswavetable::Player player(gswavetable::load_dls(read("gm.dls")));
-    player.play(gswavetable::Sequencer(read("song.mid"))); // from tick 0; play(song, tick) seeks
-    std::vector<std::int16_t> pcm, block(2 * 1024);         // 22 050 Hz, 16-bit, stereo interleaved
-    while (player.playing()) {                              // until the file's end
+int main(int argc, char **argv) {
+    if (argc != 4)
+        return 2;
+    // Throws std::runtime_error for a bank the synth rejects, std::invalid_argument for a bad MIDI file.
+    gswavetable::Player player(gswavetable::load_dls(read(argv[1])));
+    player.play(gswavetable::Sequencer(read(argv[2]))); // from tick 0; play(song, tick) starts later
+    std::vector<std::int16_t> pcm, block(2 * 1024);      // 22 050 Hz, 16-bit, stereo interleaved
+    while (player.playing()) {                           // until the file's end
         const auto frames = player.render(block.data(), 1024);
         pcm.insert(pcm.end(), block.begin(), block.begin() + 2 * std::ptrdiff_t(frames));
     }
+    // A 44-byte WAV header (PCM, stereo, 22 050 Hz, 16-bit), then the samples (little-endian hosts).
+    const auto bytes = std::uint32_t(pcm.size() * 2);
+    const std::uint32_t header[] = {0x46464952, 36 + bytes, 0x45564157, 0x20746d66, 16,    0x00020001,
+                                    22050,      22050 * 4,  0x00100004, 0x61746164, bytes};
+    std::ofstream out(argv[3], std::ios::binary);
+    out.write(reinterpret_cast<const char *>(header), sizeof header);
+    out.write(reinterpret_cast<const char *>(pcm.data()), std::streamsize(bytes));
+    return out ? 0 : 1;
 }
 ```
 
 `Player::render` can also feed an audio callback directly: it fills the buffer it is given and
-returns how many frames are music (the rest is silence once the file has ended). `pause()`,
+returns how many frames are music (the rest is silence once the file has ended);
+[`examples/audio_callback.cpp`](examples/audio_callback.cpp) streams 48 kHz float frames on demand. `pause()`,
 `resume()`, `stop()` and `position()` (in ticks) work as with MCI. For 48 kHz output, push the
 samples through `gswavetable::TransparentResampler` or `gswavetable::WindowsResampler`
 (`resampler.hpp`; see "22 050 Hz or 48 kHz"). To drive the synth with your own

@@ -1,0 +1,5 @@
+# LF everywhere (tests compare README.md with examples/ byte for byte), the test data as binary.
+* text=auto eol=lf
+*.dls binary
+*.mid binary
+*.png binary
