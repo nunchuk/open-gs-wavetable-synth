@@ -28,7 +28,7 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
 | `include/gswavetable/engine.hpp`, `src/engine.cpp` | The synth: DLS loader (`load_dls`), `Synth`, the tables. Comments give the field offsets and function RVAs of the Windows binary. |
 | `include/gswavetable/sequencer.hpp`, `src/sequencer.cpp` | `Sequencer`: a Standard MIDI File as `mciseq.dll` orders it, scheduled on the exact tempo map. |
 | `include/gswavetable/player.hpp`, `src/player.cpp` | `Player`: play / stop / pause / resume, rendering in Windows' 10 ms cycles. |
-| `include/gswavetable/resampler.hpp` | `Resampler`: Windows' 22 050 -> 48 000 Hz converter (header only). |
+| `include/gswavetable/resampler.hpp` | The 22 050 -> 48 000 Hz converters (header only): `TransparentResampler` (the default) and `WindowsResampler` (Windows 10's audio engine's). |
 | `tools/render.cpp` | `gswavetable-render`, the CLI. |
 | `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`. |
 | `tests/data/` | `golden.tsv`, the probe and feature MIDI files, `sine.dls`, and the scripts that generated `sine.dls` and `features.mid`. |

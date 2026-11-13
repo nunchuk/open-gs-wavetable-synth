@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-// gswavetable-render [--from TICK] [--48k] BANK.dls INPUT.mid OUTPUT.wav
+// gswavetable-render [--from TICK] [--48k [transparent|windows]] BANK.dls INPUT.mid OUTPUT.wav
 // Renders a MIDI file as Windows plays it through MCI on the Microsoft GS Wavetable synth
 // (player.hpp): "play mid from TICK" (default 0) to the file's end, where the port closes.
 // Writes 16-bit stereo PCM at 22 050 Hz, the synth's own output; with --48k, 32-bit float stereo
-// at 48 000 Hz through Windows' sample-rate converter (resampler.hpp), as a 48 kHz endpoint gets it.
+// at 48 000 Hz (resampler.hpp): transparent (the default), the synth's own sound, or windows,
+// Windows 10's audio engine's converter, as a 48 kHz endpoint gets it there.
 #include "gswavetable/engine.hpp"
 #include "gswavetable/player.hpp"
 #include "gswavetable/resampler.hpp"
@@ -21,7 +22,8 @@
 
 namespace {
 
-constexpr const char *usage = "usage: gswavetable-render [--from TICK] [--48k] BANK.dls INPUT.mid OUTPUT.wav\n";
+constexpr const char *usage =
+    "usage: gswavetable-render [--from TICK] [--48k [transparent|windows]] BANK.dls INPUT.mid OUTPUT.wav\n";
 
 std::vector<std::uint8_t> read(const std::string &path) {
     std::ifstream input(path, std::ios::binary);
@@ -62,12 +64,25 @@ void write_wav(const std::string &path, std::uint16_t format, std::uint32_t rate
         throw std::runtime_error("cannot write " + path);
 }
 
+// The 22 050 Hz frames at 48 000 Hz. The output after the end is silence: `ahead` frames of it
+// (the converter's look-ahead) complete the last output frames.
+template <class Converter> std::vector<float> to_48k(const std::vector<std::int16_t> &pcm, std::size_t ahead) {
+    Converter converter;
+    const std::size_t frames = pcm.size() / 2;
+    converter.push(pcm.data(), frames);
+    const std::vector<std::int16_t> silence(2 * ahead, 0);
+    converter.push(silence.data(), ahead);
+    std::vector<float> out(2 * ((frames * Converter::up + Converter::down - 1) / Converter::down));
+    out.resize(2 * converter.pull(out.data(), out.size() / 2));
+    return out;
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
     namespace gs = gswavetable;
     std::uint32_t from = 0;
-    bool resample = false;
+    std::string resampler; // empty: 22 050 Hz
     std::vector<std::string> paths;
     for (int i = 1; i < argc; ++i) {
         const std::string arg = argv[i];
@@ -80,7 +95,9 @@ int main(int argc, char **argv) {
             }
             from = std::uint32_t(value);
         } else if (arg == "--48k") {
-            resample = true;
+            resampler = "transparent";
+            if (i + 1 < argc && (std::string(argv[i + 1]) == "transparent" || std::string(argv[i + 1]) == "windows"))
+                resampler = argv[++i];
         } else if (arg == "-h" || arg == "--help") {
             std::cout << usage;
             return 0;
@@ -107,17 +124,12 @@ int main(int argc, char **argv) {
             pcm.insert(pcm.end(), block.begin(), block.begin() + 2 * std::ptrdiff_t(n));
         }
         const std::size_t frames = pcm.size() / 2;
-        if (resample) {
-            // The output after the end is silence: 6 frames of it complete the filter's last taps.
-            gs::Resampler resampler;
-            resampler.push(pcm.data(), frames);
-            const std::vector<std::int16_t> silence(2 * 6, 0);
-            resampler.push(silence.data(), 6);
-            std::vector<float> out(2 * ((frames * gs::Resampler::up + gs::Resampler::down - 1) / gs::Resampler::down));
-            out.resize(2 * resampler.pull(out.data(), out.size() / 2));
+        if (!resampler.empty()) {
+            const auto out = resampler == "windows" ? to_48k<gs::WindowsResampler>(pcm, 6)
+                                                    : to_48k<gs::TransparentResampler>(pcm, gs::TransparentResampler::half);
             write_wav(paths[2], 3, 48000, 32, out.data(), out.size() / 2);
             std::cerr << paths[1] << ": " << song.length() << " ticks, " << song.seconds() << " s, " << out.size() / 2
-                      << " frames at 48 000 Hz written\n";
+                      << " frames at 48 000 Hz (" << resampler << ") written\n";
         } else {
             write_wav(paths[2], 1, gs::engine_rate, 16, pcm.data(), frames);
             std::cerr << paths[1] << ": " << song.length() << " ticks, " << song.seconds() << " s, " << frames

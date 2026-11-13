@@ -19,12 +19,25 @@ The first release, to be tagged 0.1.0.
   note-off before a repeated note-on), each event at its exact tempo-map frame, rendered in
   Windows' 10 ms cycles. `Player` is an object (play, stop, pause, resume, render, playing, ended,
   position in ticks) so that a program can run several; `render` returns the frames of music.
-- `Resampler`: Windows' 22 050 -> 48 000 Hz converter, identified from loopback recordings (to
-  -144.8 dB, float precision).
-- `gswavetable-render`: renders a MIDI file to WAV, from a tick (`--from`), at 22 050 Hz or through
-  the converter at 48 kHz (`--48k`). The WAV ends at the file's end frame.
+- Two 22 050 -> 48 000 Hz converters. `TransparentResampler`, the default: a Kaiser-windowed sinc
+  cut at 10 762.5 Hz, 140 input frames each side, linear phase (tones to 10.5 kHz within
+  0.0003 dB, 11 kHz at -75.8 dB, every image -103.8 dB or below), equal to the game port's `hq`
+  converter to the bit when both are built without floating-point contraction (13.7 M samples of
+  a song, 0 differ). `WindowsResampler`: Windows 10's audio engine's converter, identified from
+  loopback recordings (to -144.8 dB, float precision). Why the transparent one is the default:
+  Windows 10's converter is a host effect that dulls the synth. On four MIDI files matched in
+  loudness it puts the 10 kHz third octave 4.9-5.7 dB under a transparent conversion (the same
+  within 0.1 dB below 6 kHz) and leaves images above 11 kHz at -43..-49 dB of the energy; per
+  instrument that is about ten times the difference between this engine and slopgs. Windows XP,
+  whose `gm.dls` is the same file, sent the 22 050 Hz stream to a 22 050 Hz card unconverted, and
+  listening found those recordings right where the Windows 10 conversion sounded dull (the game
+  port's measurements, 2026-11-11). The game port's NEON block path is not taken: it relies on
+  clang fusing the scalar sums into multiply-adds, which `-ffp-contract=off` forbids; without it
+  the converter costs about 0.34 % of real time on an M4 Mac.
+- `gswavetable-render`: renders a MIDI file to WAV, from a tick (`--from`), at 22 050 Hz or at
+  48 kHz (`--48k`, transparent; `--48k windows`). The WAV ends at the file's end frame.
 - Tests that need no Windows files: the tables' hash (FNV-1a 64 `0xa71c7a8d3fdda710`), the
-  sequencer on generated MIDI files, the converter's tone response, and golden SHA-256 renders on a
+  sequencer on generated MIDI files, both converters' tone responses, and golden SHA-256 renders on a
   generated DLS bank (`tests/data/sine.dls`) of two probe files and `features.mid`, which covers
   the MIDI and SysEx handling and more notes than voices. With `GSWAVETABLE_DLS` the same goldens on
   `gm.dls`.

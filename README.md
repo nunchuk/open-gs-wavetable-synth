@@ -12,8 +12,8 @@ What it reimplements: the DirectMusic synth core (`CSynth`, `CControlLogic`, `CV
 `CVoiceLFO`, `CDigitalAudio`, `CInstManager` and the DLS loader) linked into
 `C:\Windows\SysWOW64\wdmaud.drv` 10.0.20348.2849, the driver a 32-bit program uses, reconstructed
 from its disassembly with Microsoft's public symbols. On top of it: a Standard MIDI File player
-that sends messages the way Windows' MCI sequencer (`mciseq.dll`) does, and Windows' audio-engine
-converter from the synth's 22 050 Hz to 48 kHz.
+that sends messages the way Windows' MCI sequencer (`mciseq.dll`) does, and two conversions from
+the synth's 22 050 Hz to 48 kHz: a transparent one, and Windows 10's audio engine's.
 
 ## Use it from CMake
 
@@ -59,7 +59,8 @@ int main() {
 `Player::render` can also feed an audio callback directly: it fills the buffer it is given and
 returns how many frames are music (the rest is silence once the file has ended). `pause()`,
 `resume()`, `stop()` and `position()` (in ticks) work as with MCI. For 48 kHz output, push the
-samples through `gswavetable::Resampler` (`resampler.hpp`). To drive the synth with your own
+samples through `gswavetable::TransparentResampler` or `gswavetable::WindowsResampler`
+(`resampler.hpp`; see "22 050 Hz or 48 kHz"). To drive the synth with your own
 events instead of a file, use `gswavetable::Synth` (`engine.hpp`): `play(sample_time, message)`
 and `render(buffer, frames, position)`.
 
@@ -68,11 +69,29 @@ and `render(buffer, frames, position)`.
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
 build/gswavetable-render gm.dls song.mid song.wav              # 16-bit PCM, 22 050 Hz
-build/gswavetable-render --48k gm.dls song.mid song-48k.wav    # 32-bit float, 48 000 Hz
+build/gswavetable-render --48k gm.dls song.mid song-48k.wav    # 32-bit float, 48 000 Hz, transparent
+build/gswavetable-render --48k windows gm.dls song.mid w.wav   # 48 000 Hz as Windows 10 converts it
 build/gswavetable-render --from 1920 gm.dls song.mid tail.wav  # from tick 1920, with the chase
 ```
 
 The WAV ends where the file ends (its last tick), where Windows closes the MIDI port.
+
+## 22 050 Hz or 48 kHz
+
+The synth runs at 22 050 Hz, and that stream is its sound. Most devices play 44.1 or 48 kHz, so it
+has to be converted, and the conversion changes what you hear:
+
+- `transparent` (`TransparentResampler`, the CLI's `--48k`): a band-limited reconstruction that
+  adds and takes away nothing audible: tones up to 10.5 kHz within 0.01 dB, no image within 90 dB
+  (a Kaiser-windowed sinc cut at 10 762.5 Hz, 140 input frames each side, linear phase). This is
+  the synth's own sound, as Windows XP played it on a card that runs at 22 050 Hz: XP's mixer
+  passed the stream on unconverted.
+- `windows` (`WindowsResampler`, `--48k windows`): Windows 10's audio engine's converter, as a
+  48 kHz endpoint gets the stream there. It sounds duller: on four MIDI files matched in loudness,
+  the 10 kHz third octave is about 5 dB (4.9-5.7 dB) under the transparent conversion, the same
+  within 0.1 dB below 6 kHz, and images above 11 kHz hold -43..-49 dB of the energy.
+
+Pick `windows` to sound as Windows 10 does at a 48 kHz endpoint, `transparent` for the synth itself.
 
 ## Where to get gm.dls
 
@@ -80,7 +99,7 @@ The WAV ends where the file ends (its last tick), where Windows closes the MIDI 
 here. Copy it from a Windows installation: `C:\Windows\System32\drivers\gm.dls`. The copy this
 engine was verified with is Windows Server 2022's: 3 440 660 bytes, SHA-256
 `3229b09b9d7d9f3f4793b0d9b34fe6abc75cfa4a2503c0c90f43ff651ba7f2c0`. The tests run without it, on
-a small generated bank (`tests/data/sine.dls`).
+a small generated bank (`tests/data/sine.dls`). Windows XP's `gm.dls` is byte-identical.
 
 ## What it does, and does not, do
 
@@ -122,9 +141,9 @@ through this engine reproduces every sample:
 - 17 recordings of seeks, chases and pauses: 5 587 466 frames, 0 differing samples;
 - the engine's tables (1 884 entries) equal the ones the driver computes, read from its `.data`.
 
-The 48 kHz converter was identified from loopback recordings of a 48 kHz endpoint fed by the same
-plays (a 320/147 polyphase Kaiser-windowed sinc, 12 taps); it reproduces the loopback to float
-precision (-144.8 dB on held-out data).
+Windows 10's converter (`WindowsResampler`) was identified from loopback recordings of a 48 kHz
+endpoint fed by the same plays (a 320/147 polyphase Kaiser-windowed sinc, 12 taps); it reproduces
+the loopback to float precision (-144.8 dB on held-out data).
 
 In this repository, CI (Linux GCC and Clang, macOS AppleClang, Windows MSVC, Emscripten on
 Node.js) checks that every platform renders the golden files to the same SHA-256
