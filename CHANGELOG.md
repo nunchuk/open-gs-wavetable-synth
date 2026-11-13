@@ -5,7 +5,9 @@ All notable changes to this project are documented here, following the
 
 ## [Unreleased]
 
-The first release, to be tagged 0.1.0.
+## [0.1.0] - 2026-11-13
+
+The first release.
 
 ### Added
 
