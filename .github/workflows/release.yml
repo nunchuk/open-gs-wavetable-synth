@@ -1,0 +1,90 @@
+name: Release
+
+# On a version tag (v0.1.0): build on every platform, run the tests, and attach the installed tree
+# (gswavetable-render, the library, its headers and CMake package, LICENSE, README.md) to the tag's
+# GitHub Release, whose notes are the version's section of CHANGELOG.md.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  native:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-22.04
+            options: '"-DCMAKE_EXE_LINKER_FLAGS=-static-libstdc++ -static-libgcc"'
+          - name: macos-universal
+            os: macos-latest
+            options: '"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"'
+          - name: windows-x86_64
+            os: windows-latest
+            options: "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.options }}
+          cmake --build build --config Release --parallel
+          ctest --test-dir build --build-config Release --output-on-failure
+      - name: Package
+        run: |
+          dir="gswavetable-${GITHUB_REF_NAME#v}-${{ matrix.name }}"
+          cmake --install build --config Release --prefix "$dir"
+          if [ "$RUNNER_OS" = Windows ]; then 7z a "$dir.zip" "$dir"; else tar czf "$dir.tar.gz" "$dir"; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: |
+            gswavetable-*.tar.gz
+            gswavetable-*.zip
+
+  wasm:
+    name: wasm (Node.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.0
+      - name: Build and test
+        run: |
+          emcmake cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure
+      - name: Package
+        run: |
+          dir="gswavetable-${GITHUB_REF_NAME#v}-wasm"
+          cmake --install build --prefix "$dir"
+          tar czf "$dir.tar.gz" "$dir"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wasm
+          path: gswavetable-*.tar.gz
+
+  release:
+    needs: [native, wasm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '/^## \[/ { if (on) exit; on = index($0, "[" v "]") > 0; next } on' CHANGELOG.md > notes.md
+          [ -s notes.md ] || echo "See CHANGELOG.md." > notes.md
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --notes-file notes.md

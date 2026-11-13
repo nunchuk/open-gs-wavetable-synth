@@ -33,6 +33,7 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
 | `examples/` | `render_wav.cpp` (README.md's C++ block, verbatim) and `audio_callback.cpp`; also a standalone CMake project that finds the installed package. |
 | `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`, and the CMake scripts that check README.md against `examples/` and the examples' output. |
 | `tests/data/` | `golden.tsv`, the probe and feature MIDI files, `sine.dls`, and the scripts that generated `sine.dls` and `features.mid`. |
+| `.github/workflows/` | `ci.yml` (every platform, warnings as errors, install and consume), `release.yml` (binaries on a `v*` tag). |
 
 ### Invariants
 

@@ -54,6 +54,10 @@ The first release, to be tagged 0.1.0.
 - CMake install rules and a package config: `find_package(gswavetable 0.1 REQUIRED)` after
   `cmake --install` (`GSWAVETABLE_INSTALL`, on when this is the top-level project), which a package
   manager port needs.
+- `.github/workflows/release.yml`: on a `v*` tag, builds and tests on Linux (libstdc++ linked
+  statically), macOS (universal arm64 and x86_64), Windows (static CRT) and WebAssembly, and
+  attaches the installed trees to the tag's GitHub Release with the version's CHANGELOG section as
+  its notes, so that the CLI can be used without building it.
 - AI collaboration rules: `AGENTS.md` (shared, with this project's build commands, code map and
   invariants), `CLAUDE.md` and a Kiro agent that load it.
 
