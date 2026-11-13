@@ -51,6 +51,13 @@ The first release, to be tagged 0.1.0.
   the golden render of `probe1.mid`, and `example_audio_callback` that the streamed 48 kHz frames
   equal `gswavetable-render --48k`'s, then silence. `.gitattributes` keeps text files LF so those
   byte comparisons hold on Windows checkouts.
+- WebAssembly builds use WebAssembly's exception handling (`-fwasm-exceptions`, public on the
+  library target). Why: `load_dls` and `Sequencer` report bad input with exceptions, and Emscripten
+  catches none by default; the first CI run's sequencer test died with `UnhandledPromiseRejection:
+  ... The promise rejected with the reason "71208"` (the thrown object's address) where it expects
+  `std::invalid_argument`, and a program could not catch a bad file either. With it the tests pass
+  on Node.js and the `gm.dls` goldens rendered there have the same SHA-256 as on every other
+  platform.
 - CMake install rules and a package config: `find_package(gswavetable 0.1 REQUIRED)` after
   `cmake --install` (`GSWAVETABLE_INSTALL`, on when this is the top-level project), which a package
   manager port needs.

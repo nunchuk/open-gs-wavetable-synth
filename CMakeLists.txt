@@ -24,6 +24,13 @@ target_include_directories(gswavetable PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_
 target_compile_features(gswavetable PUBLIC cxx_std_20)
 set_target_properties(gswavetable PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(gswavetable PRIVATE ${gswavetable_options})
+if(EMSCRIPTEN)
+  # load_dls and Sequencer report bad input with exceptions, and Emscripten catches none unless
+  # the code is built with exception handling: WebAssembly's own, which costs nothing until a
+  # throw. Public, so that the code calling the library is built the same way.
+  target_compile_options(gswavetable PUBLIC -fwasm-exceptions)
+  target_link_options(gswavetable PUBLIC -fwasm-exceptions)
+endif()
 
 if(GSWAVETABLE_BUILD_TOOLS)
   add_executable(gswavetable-render tools/render.cpp)

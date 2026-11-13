@@ -235,7 +235,9 @@ recording of Windows playing it through MCI only in event timing (the exact temp
 only `gm.dls` was compared with Windows.
 
 **Does it run in the browser?** It builds with Emscripten, and CI runs its tests on Node.js; the
-releases include a Node.js build of the CLI. There is no web demo or npm package yet.
+releases include a Node.js build of the CLI. The CMake target builds with WebAssembly exception
+handling (`-fwasm-exceptions`), which every current browser and Node.js support. There is no web
+demo or npm package yet.
 
 **Can I call it from Python, Rust or JavaScript?** Not directly yet: the API is C++ (there is no C
 API). Wrapping `Player` is a few functions.
