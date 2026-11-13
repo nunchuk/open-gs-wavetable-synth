@@ -58,6 +58,12 @@ The first release, to be tagged 0.1.0.
   statically), macOS (universal arm64 and x86_64), Windows (static CRT) and WebAssembly, and
   attaches the installed trees to the tag's GitHub Release with the version's CHANGELOG section as
   its notes, so that the CLI can be used without building it.
+- README.md written for readers that search and compare, people and AI agents alike: an
+  at-a-glance table, a quick start, the evidence as charts with their numbers in text and tables
+  (a recording of the Windows synth against this library's replay; the two 48 kHz converters'
+  response, from `docs/charts/converter_response.cpp`), when not to use it, an FAQ, and the
+  Windows about box of the synth with a trademark notice. `docs/charts/make_charts.py` writes the
+  SVGs (light and dark) with a colour-vision-checked palette.
 - AI collaboration rules: `AGENTS.md` (shared, with this project's build commands, code map and
   invariants), `CLAUDE.md` and a Kiro agent that load it.
 
@@ -71,6 +77,9 @@ The first release, to be tagged 0.1.0.
   same output over 68.1 M frames. The source changes are the namespace, comments, explicit
   conversions where `-Wconversion` and MSVC `/W4` would warn, and a local variable renamed where it
   hid a member.
+- The bit-exactness was checked again with this library itself, not the game port's copy: all 52
+  recordings of the Windows synth (64 036 275 frames) replay with 0 differing samples.
 - Built with `-ffp-contract=off` (MSVC `/fp:precise`): the tables use `pow`, `log10` and `sin`, and a
   fused multiply-add could flip a rounding. On AppleClang arm64 the output is the same with and
-  without contraction; the tables test catches a platform where it is not.
+  without contraction; the tables test catches a platform where it is not. A universal macOS build
+  run as x86_64 under Rosetta passes the tables test and all golden renders, `gm.dls`'s included.

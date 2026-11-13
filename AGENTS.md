@@ -33,6 +33,7 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
 | `examples/` | `render_wav.cpp` (README.md's C++ block, verbatim) and `audio_callback.cpp`; also a standalone CMake project that finds the installed package. |
 | `tests/` | `tables_test`, `sequencer_test`, `resampler_test`, `golden_test`, and the CMake scripts that check README.md against `examples/` and the examples' output. |
 | `tests/data/` | `golden.tsv`, the probe and feature MIDI files, `sine.dls`, and the scripts that generated `sine.dls` and `features.mid`. |
+| `docs/charts/`, `docs/images/` | README.md's charts (SVG, light and dark) and the scripts and data that make them; the MSGS about box. |
 | `.github/workflows/` | `ci.yml` (every platform, warnings as errors, install and consume), `release.yml` (binaries on a `v*` tag). |
 
 ### Invariants
@@ -48,7 +49,8 @@ GSWAVETABLE_DLS=/path/to/gm.dls ctest --test-dir build -R golden_gm   # also the
   `-Wall -Wextra -Wpedantic -Wconversion` (and MSVC `/W4`), no floating-point contraction.
 - Every `Synth` or `Player` is used by one thread at a time; a loaded `Bank` is immutable.
 - README.md's C++ block is `examples/render_wav.cpp`, character for character (ctest
-  `readme_example`); change both together.
+  `readme_example`); change both together. README.md's numbers are measured: give the source of
+  every new one, and regenerate the charts with `docs/charts/` rather than editing the SVGs.
 
 ## Working principles (from Andrej Karpathy's notes on common LLM coding mistakes)
 
